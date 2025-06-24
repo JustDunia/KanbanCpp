@@ -2,7 +2,6 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <iostream>
 #include <QIODevice>
 #include <QDir>
 

@@ -9,10 +9,11 @@
 class Task
 {
 public:
-    Task(QString t = "", Status s = Status::ToDo);
+    Task(QString t = "new task", QString d = "", Status s = Status::ToDo);
 
     QUuid id;
     QString title;
+    QString description;
     Status status;
 
     QJsonObject toJson() const;

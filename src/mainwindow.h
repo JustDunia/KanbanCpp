@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "boardwidget.h"
 #include "board.h"
 #include <QMainWindow>
 
@@ -19,9 +18,19 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void onTaskAdded(const Task &task);
+    void onTaskRemoved(const QUuid &id);
+    void onTaskUpdated(const Task &task);
+
+    void on_addBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
     Board *board;
-    BoardWidget *boardWidget;
+    QString fileName;
+
+    void connectSignals();
+    void addTaskToUI(const Task &task);
 };
 #endif // MAINWINDOW_H

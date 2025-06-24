@@ -22,6 +22,8 @@ private slots:
     void onTaskRemoved(const QUuid &id);
     void onTaskUpdated(const Task &task);
 
+    void on_pushButton_clicked();
+
 private:
     Ui::BoardWidget *ui;
     Board *board;
