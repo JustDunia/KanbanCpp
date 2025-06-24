@@ -1,36 +1,34 @@
+#pragma once
+
 #ifndef BOARD_H
 #define BOARD_H
 #include "task.h"
-#include "status.h"
-#include <QWidget>
+#include <QObject>
 
-namespace Ui {
-class Board;
-}
-
-class Board : public QWidget
+class Board : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit Board(QWidget *parent = nullptr);
-    ~Board();
+    explicit Board(QObject *parent = nullptr);
 
-    QVector<Task> tasks;
-
-    void addTask(const Task &task);
-    void updateTask(const QUuid &id, const Task &task);
+    void addTask(Task task);
     void removeTask(const QUuid &id);
     Task* getTaskById(const QUuid &id);
     QVector<Task> getTasksByStatus(Status status) const;
-    bool saveToFile(const QString &filename) const;
-    bool loadFromFile(const QString &filename);
+    const QVector<Task>& getTasks() const;
 
-private:
-    Ui::Board *ui;
+
+    bool loadFromFile(const QString &filename);
+    bool saveToFile(const QString &filename) const;
 
 signals:
-    void boardChanged();
+    void taskAdded(const Task &task);
+    void taskRemoved(const QUuid &id);
+    void taskUpdated(const Task &task);
+
+private:
+    QVector<Task> tasks;
+
 };
 
 #endif // BOARD_H

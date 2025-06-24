@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "boardwidget.h"
+#include "board.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -19,5 +21,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    Board *board;
+    BoardWidget *boardWidget;
 };
 #endif // MAINWINDOW_H

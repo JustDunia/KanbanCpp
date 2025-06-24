@@ -10,18 +10,20 @@ CONFIG += c++17
 
 SOURCES += \
     board.cpp \
+    boardwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     task.cpp
 
 HEADERS += \
     board.h \
+    boardwidget.h \
     mainwindow.h \
     status.h \
     task.h
 
 FORMS += \
-    board.ui \
+    boardwidget.ui \
     mainwindow.ui
 
 # Default rules for deployment.
