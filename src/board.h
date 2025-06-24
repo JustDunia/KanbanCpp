@@ -25,6 +25,7 @@ signals:
     void taskAdded(const Task &task);
     void taskRemoved(const QUuid &id);
     void taskUpdated(const Task &task);
+    void taskMoved();
 
 private:
     QVector<Task> tasks;

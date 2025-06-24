@@ -12,8 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Kanban App");
     fileName = "kanban.json";
     board->loadFromFile(fileName);
-
     connectSignals();
+    ui->todoList->setStatus(Status::ToDo);
+    ui->inProgressList->setStatus(Status::InProgress);
+    ui->doneList->setStatus(Status::Done);
 
     for (const Task &task : board->getTasks()) {
         addTaskToUI(task);
@@ -29,10 +31,14 @@ void MainWindow::connectSignals() {
     connect(board, &Board::taskAdded, this, &MainWindow::onTaskAdded);
     connect(board, &Board::taskRemoved, this, &MainWindow::onTaskRemoved);
     connect(board, &Board::taskUpdated, this, &MainWindow::onTaskUpdated);
+    connect(ui->todoList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
+    connect(ui->inProgressList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
+    connect(ui->doneList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
+
 }
 
 void MainWindow::addTaskToUI(const Task &task) {
-    QListWidget *list = nullptr;
+    KanbanListWidget *list = nullptr;
     switch (task.status) {
     case Status::ToDo: list = ui->todoList; break;
     case Status::InProgress: list = ui->inProgressList; break;
@@ -50,9 +56,13 @@ void MainWindow::onTaskAdded(const Task &task) {
     board->saveToFile(fileName);
 }
 
+void MainWindow::onTaskMoved(){
+    board->saveToFile(fileName);
+}
+
 void MainWindow::onTaskUpdated(const Task &task) {
-    QList<QListWidget*> lists = { ui->todoList, ui->inProgressList, ui->doneList };
-    for (QListWidget *list : lists) {
+    QList<KanbanListWidget*> lists = { ui->todoList, ui->inProgressList, ui->doneList };
+    for (KanbanListWidget *list : lists) {
         for (int i = 0; i < list->count(); ++i) {
             auto *item = list->item(i);
             if (item->data(Qt::UserRole).toUuid() == task.id) {
@@ -66,8 +76,8 @@ void MainWindow::onTaskUpdated(const Task &task) {
 }
 
 void MainWindow::onTaskRemoved(const QUuid &id) {
-    QList<QListWidget*> lists = { ui->todoList, ui->inProgressList, ui->doneList };
-    for (QListWidget *list : lists) {
+    QList<KanbanListWidget*> lists = { ui->todoList, ui->inProgressList, ui->doneList };
+    for (KanbanListWidget *list : lists) {
         for (int i = 0; i < list->count(); ++i) {
             auto *item = list->item(i);
             if (item->data(Qt::UserRole).toUuid() == id) {
@@ -87,6 +97,14 @@ void MainWindow::on_addBtn_clicked()
         QString description = form.getDescription();
         Task task(title, description);
         board->addTask(task);
+    }
+}
+
+void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
+    Task *task = board->getTaskById(id);
+    if (task && task->status != newStatus) {
+        task->status = newStatus;
+        board->saveToFile(fileName);
     }
 }
 

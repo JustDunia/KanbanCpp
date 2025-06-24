@@ -25,13 +25,13 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QListWidget" name="todoList"/>
+      <widget class="KanbanListWidget" name="todoList"/>
      </item>
      <item>
-      <widget class="QListWidget" name="inProgressList"/>
+      <widget class="KanbanListWidget" name="inProgressList"/>
      </item>
      <item>
-      <widget class="QListWidget" name="doneList"/>
+      <widget class="KanbanListWidget" name="doneList"/>
      </item>
     </layout>
    </widget>
@@ -61,6 +61,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KanbanListWidget</class>
+   <extends>QListWidget</extends>
+   <header>kanbanlistwidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

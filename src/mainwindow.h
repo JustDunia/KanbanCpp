@@ -22,6 +22,7 @@ private slots:
     void onTaskAdded(const Task &task);
     void onTaskRemoved(const QUuid &id);
     void onTaskUpdated(const Task &task);
+    void onTaskMoved();
 
     void on_addBtn_clicked();
 
@@ -32,5 +33,6 @@ private:
 
     void connectSignals();
     void addTaskToUI(const Task &task);
+    void onTaskDropped(const QUuid &id, Status newStatus);
 };
 #endif // MAINWINDOW_H

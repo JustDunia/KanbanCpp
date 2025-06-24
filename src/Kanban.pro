@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     board.cpp \
     createform.cpp \
+    kanbanlistwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     task.cpp
@@ -18,6 +19,7 @@ SOURCES += \
 HEADERS += \
     board.h \
     createform.h \
+    kanbanlistwidget.h \
     mainwindow.h \
     status.h \
     task.h
