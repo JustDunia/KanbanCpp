@@ -35,7 +35,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
     KanbanController *controller;
-    QString fileName;
     QPushButton *reloadBtn;
 
     void connectSignals();

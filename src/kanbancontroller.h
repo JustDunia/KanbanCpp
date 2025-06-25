@@ -4,6 +4,7 @@
 #define KANBANCONTROLLER_H
 #include "task.h"
 #include <QObject>
+#include <QString>
 
 class KanbanController : public QObject
 {
@@ -11,16 +12,18 @@ class KanbanController : public QObject
 public:
     explicit KanbanController(QObject *parent = nullptr);
 
+    void setFileName(const QString &filename);
     void addTask(Task task);
     void removeTask(const QUuid &id);
     void updateTask(Task *currentTask, Task newTask);
+    void updateTaskStatus(const QUuid &id, Status newStatus);
     Task* getTaskById(const QUuid &id);
     const QVector<Task>& getTasks() const;
-    bool loadFromFile(const QString &filename);
-    bool saveToFile(const QString &filename) const;
+    bool loadFromFile();
+    bool saveToFile() const;
     void sortTasksByPriority();
-    void releaseLock(const QString &filename);
-    bool tryReload(const QString &filename);
+    void releaseLock();
+    bool tryReload();
 
     bool isLocked;
 
@@ -32,6 +35,7 @@ signals:
 
 private:
     QVector<Task> tasks;
+    QString fileName;
 };
 
 #endif // KANBANCONTROLLER_H

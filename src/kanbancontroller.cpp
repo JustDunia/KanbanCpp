@@ -7,12 +7,17 @@
 #include <algorithm>
 
 KanbanController::KanbanController(QObject *parent)
-    : QObject{parent}, isLocked(false)
+    : QObject{parent}, isLocked(false), fileName("kanban.json")
 {}
+
+void KanbanController::setFileName(const QString &filename) {
+    fileName = filename;
+}
 
 void KanbanController::addTask(Task task) {
     tasks.append(std::move(task));
     emit taskAdded(tasks.last());
+    saveToFile();
 }
 
 void KanbanController::removeTask(const QUuid &id) {
@@ -20,6 +25,7 @@ void KanbanController::removeTask(const QUuid &id) {
         if (tasks[i].id == id) {
             tasks.removeAt(i);
             emit taskRemoved(id);
+            saveToFile();
             break;
         }
     }
@@ -34,6 +40,7 @@ void KanbanController::updateTask(Task *currentTask, Task newTask){
         newTask.id = currentTask->id;
         newTask.createdAt = currentTask->createdAt;
         emit taskUpdated(newTask);
+        saveToFile();
     }
 }
 
@@ -44,13 +51,21 @@ Task* KanbanController::getTaskById(const QUuid &id) {
     return nullptr;
 }
 
+void KanbanController::updateTaskStatus(const QUuid &id, Status newStatus) {
+    Task *task = getTaskById(id);
+    if (task && task->status != newStatus) {
+        task->status = newStatus;
+        saveToFile();
+    }
+}
+
 const QVector<Task>& KanbanController::getTasks() const {
     return tasks;
 }
 
 
-bool KanbanController::loadFromFile(const QString &filename) {
-    QString lockFilePath = filename + ".lock";
+bool KanbanController::loadFromFile() {
+    QString lockFilePath = fileName + ".lock";
     QFile lockFile(lockFilePath);
 
     isLocked = false;
@@ -68,7 +83,7 @@ bool KanbanController::loadFromFile(const QString &filename) {
         lockFile.close();
     }
 
-    QFile file(filename);
+    QFile file(fileName);
     if (!file.exists()) {
         if (file.open(QIODevice::WriteOnly)) {
             file.write("[]");
@@ -99,22 +114,22 @@ bool KanbanController::loadFromFile(const QString &filename) {
     return true;
 }
 
-void KanbanController::releaseLock(const QString &filename) {
+void KanbanController::releaseLock() {
     if(isLocked)
         return;
-    QString lockFilePath = filename + ".lock";
+    QString lockFilePath = fileName + ".lock";
     QFile lockFile(lockFilePath);
     if (lockFile.exists()) {
         lockFile.remove();
     }
 }
 
-bool KanbanController::saveToFile(const QString &filename) const {
+bool KanbanController::saveToFile() const {
     if (isLocked) {
         return false; // Cannot save if file is locked
     }
     
-    QFile file(filename);
+    QFile file(fileName);
     if (!file.open(QIODevice::WriteOnly))
         return false;
     QJsonArray arr;
@@ -133,8 +148,8 @@ void KanbanController::sortTasksByPriority()
     });
 }
 
-bool KanbanController::tryReload(const QString &filename) {
-    QString lockFilePath = filename + ".lock";
+bool KanbanController::tryReload() {
+    QString lockFilePath = fileName + ".lock";
     QFile lockFile(lockFilePath);
 
     if (lockFile.exists()) {
@@ -148,7 +163,7 @@ bool KanbanController::tryReload(const QString &filename) {
         }
     }
 
-    QFile file(filename);
+    QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }

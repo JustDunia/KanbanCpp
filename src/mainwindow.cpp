@@ -12,7 +12,6 @@
 #include <QAction>
 
 // Constants
-static const QString DEFAULT_FILENAME = "kanban.json";
 static const QString DATE_FORMAT = "dd.MM.yyyy HH:mm";
 static const QString ICON_PATH_TEMPLATE = ":/icons/%1.png";
 
@@ -24,13 +23,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("Kanban App");
-    fileName = DEFAULT_FILENAME;
     
     setupListWidgets();
     connectSignals();
     
     // Load data after UI is fully set up
-    controller->loadFromFile(fileName);
+    controller->loadFromFile();
 
     for (const Task &task : controller->getTasks()) {
         addTaskToUI(task);
@@ -40,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-    controller->releaseLock(fileName);
+    controller->releaseLock();
 }
 
 void MainWindow::connectSignals() {
@@ -108,7 +106,6 @@ void MainWindow::addTaskToUI(const Task &task) {
 
 void MainWindow::onTaskAdded(const Task &task) {
     addTaskToUI(task);
-    controller->saveToFile(fileName);
 }
 
 void MainWindow::onTaskUpdated(const Task &task) {
@@ -119,7 +116,6 @@ void MainWindow::onTaskUpdated(const Task &task) {
             if (item->data(Qt::UserRole).toUuid() == task.id) {
                 delete list->takeItem(i);
                 addTaskToUI(task);
-                controller->saveToFile(fileName);
                 return;
             }
         }
@@ -133,7 +129,6 @@ void MainWindow::onTaskRemoved(const QUuid &id) {
             auto *item = list->item(i);
             if (item->data(Qt::UserRole).toUuid() == id) {
                 delete list->takeItem(i);
-                controller->saveToFile(fileName);
                 return;
             }
         }
@@ -153,24 +148,19 @@ void MainWindow::on_addBtn_clicked()
 }
 
 void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
-    Task *task = controller->getTaskById(id);
-    if (task && task->status != newStatus) {
-        task->status = newStatus;
-        
-        // Only reorder tasks in the destination list to maintain priority ordering
-        KanbanListWidget *destinationList = getListForStatus(newStatus);
-        
-        if (destinationList) {
-            // Clear and reload only the destination list
-            destinationList->clear();
-            for (const Task &taskItem : controller->getTasks()) {
-                if (taskItem.status == newStatus) {
-                    addTaskToUI(taskItem);
-                }
+    controller->updateTaskStatus(id, newStatus);
+    
+    // Only reorder tasks in the destination list to maintain priority ordering
+    KanbanListWidget *destinationList = getListForStatus(newStatus);
+    
+    if (destinationList) {
+        // Clear and reload only the destination list
+        destinationList->clear();
+        for (const Task &taskItem : controller->getTasks()) {
+            if (taskItem.status == newStatus) {
+                addTaskToUI(taskItem);
             }
         }
-        
-        controller->saveToFile(fileName);
     }
 }
 
@@ -203,7 +193,7 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
 void MainWindow::onReloadClicked()
 {
-    if (controller->tryReload(fileName)) {
+    if (controller->tryReload()) {
         ui->todoList->clear();
         ui->inProgressList->clear();
         ui->doneList->clear();
