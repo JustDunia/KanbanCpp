@@ -22,9 +22,8 @@ private slots:
     void onTaskAdded(const Task &task);
     void onTaskRemoved(const QUuid &id);
     void onTaskUpdated(const Task &task);
-
     void on_addBtn_clicked();
-
+    void onReadOnlyMode(bool readOnly);
 private:
     Ui::MainWindow *ui;
     Board *board;

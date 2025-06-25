@@ -3,6 +3,8 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QIODevice>
+#include <QLockFile>
+#include <QMessageBox>
 
 Board::Board(QObject *parent)
     : QObject{parent}
@@ -46,20 +48,60 @@ const QVector<Task>& Board::getTasks() const {
 
 
 bool Board::loadFromFile(const QString &filename) {
+    QString lockFilePath = filename + ".lock";
+    QFile lockFile(lockFilePath);
+
+    isLocked = false;
+    if (lockFile.exists()) {
+        QMessageBox::warning(nullptr, "Plik zablokowany", "Inna instancja aplikacji edytuje plik.");
+        isLocked = true;
+    }
+
+    if (!lockFile.open(QIODevice::WriteOnly)) {
+        QMessageBox::warning(nullptr, "Błąd blokady", "Nie udało się utworzyć pliku blokady.");
+        return false;
+    }
+
+    lockFile.close();
+
     QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::warning(nullptr, "Błąd pliku", "Nie udało się otworzyć pliku.");
         return false;
+    }
+
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    if (!doc.isArray())
+    file.close();
+
+    if (!doc.isArray()) {
+        QMessageBox::warning(nullptr, "Błąd formatu", "Plik nie zawiera poprawnych danych.");
         return false;
+    }
+
     tasks.clear();
     QJsonArray arr = doc.array();
     for (const auto &v : arr)
         tasks.append(Task::fromJson(v.toObject()));
-    if(tasks.empty())
+
+    if (tasks.empty()) {
+        QMessageBox::warning(nullptr, "Błąd danych", "Plik nie zawiera żadnych zadań.");
         return false;
+    }
+
     emit taskAdded(tasks.last());
+    emit readOnlyMode(isLocked);
+
     return true;
+}
+
+void Board::releaseLock(const QString &filename) {
+    if(isLocked)
+        return;
+    QString lockFilePath = filename + ".lock";
+    QFile lockFile(lockFilePath);
+    if (lockFile.exists()) {
+        lockFile.remove();
+    }
 }
 
 bool Board::saveToFile(const QString &filename) const {

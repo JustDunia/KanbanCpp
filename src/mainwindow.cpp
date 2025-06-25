@@ -3,6 +3,7 @@
 #include "editform.h"
 #include "ui_mainwindow.h"
 #include <QStandardPaths>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -10,10 +11,13 @@ MainWindow::MainWindow(QWidget *parent)
     , board(new Board(this))
 {
     ui->setupUi(this);
-    setWindowTitle("Kanban App");
-    fileName = "kanban.json";
-    board->loadFromFile(fileName);
     connectSignals();
+    setWindowTitle("Kanban App");
+    fileName = QFileDialog::getOpenFileName(this, tr("Open Kanban File"), "", tr("Kanban Files (*.json);;All Files (*)"));
+    if (fileName.isEmpty()) {
+        fileName = "kanban.json";
+    }
+    board->loadFromFile(fileName);
     ui->todoList->setStatus(Status::ToDo);
     ui->inProgressList->setStatus(Status::InProgress);
     ui->doneList->setStatus(Status::Done);
@@ -29,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    board->releaseLock(fileName);
 }
 
 void MainWindow::connectSignals() {
@@ -41,7 +46,14 @@ void MainWindow::connectSignals() {
     connect(ui->todoList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
     connect(ui->inProgressList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
     connect(ui->doneList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    connect(board, &Board::readOnlyMode, this, &MainWindow::onReadOnlyMode);
+}
 
+void MainWindow::onReadOnlyMode(bool readOnly){
+    ui->addBtn->setDisabled(readOnly);
+    ui->todoList->setDragEnabled(!readOnly);
+    ui->inProgressList->setDragEnabled(!readOnly);
+    ui->doneList->setDragEnabled(!readOnly);
 }
 
 void MainWindow::addTaskToUI(const Task &task) {
@@ -145,6 +157,8 @@ void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
 
 void MainWindow::showContextMenu(const QPoint &pos)
 {
+    if(board->isLocked)
+        return;
     QListWidget* list = qobject_cast<QListWidget*>(sender());
     QListWidgetItem* item = list->itemAt(pos);
     if (!item)

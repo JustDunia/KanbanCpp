@@ -19,15 +19,18 @@ public:
     bool loadFromFile(const QString &filename);
     bool saveToFile(const QString &filename) const;
     void sortTasksByPriority();
+    void releaseLock(const QString &filename);
+
+    bool isLocked;
 
 signals:
     void taskAdded(const Task &task);
     void taskRemoved(const QUuid &id);
     void taskUpdated(const Task &task);
+    void readOnlyMode(bool readOnly);
 
 private:
     QVector<Task> tasks;
-
 };
 
 #endif // BOARD_H

@@ -20,7 +20,7 @@
         "description": "",
         "id": "{3a897f31-fe92-45e3-b10e-4503b78de5fd}",
         "priority": 2,
-        "status": 0,
+        "status": 1,
         "title": "test4"
     },
     {
@@ -36,7 +36,7 @@
         "description": "",
         "id": "{566f7fe9-a067-4070-b35a-d2799c95be81}",
         "priority": 1,
-        "status": 1,
+        "status": 0,
         "title": "test 0"
     },
     {
