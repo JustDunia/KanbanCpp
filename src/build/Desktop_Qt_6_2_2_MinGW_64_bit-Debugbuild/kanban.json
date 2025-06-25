@@ -1,12 +1,26 @@
 [
-  {
-    "id": "23r8je982fjo2jf3fuj",
-    "title": "test",
-    "status": 0
-  },
-  {
-    "id": "4573673432tfv5t",
-    "title": "jakieś zadanie",
-    "status": 1
-  }
+    {
+        "description": "",
+        "id": "{00000000-0000-0000-0000-000000000000}",
+        "status": 0,
+        "title": "test"
+    },
+    {
+        "description": "",
+        "id": "{00000000-0000-0000-0000-000000000000}",
+        "status": 1,
+        "title": "jakieś zadanie"
+    },
+    {
+        "description": "",
+        "id": "{4a69af06-dc34-447d-a438-f092f894043f}",
+        "status": 0,
+        "title": "nauka"
+    },
+    {
+        "description": "sadfasdf",
+        "id": "{3d7e0884-63c3-4dd9-a507-f3e4c7d0c885}",
+        "status": 0,
+        "title": "sdf"
+    }
 ]

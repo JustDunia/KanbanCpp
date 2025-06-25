@@ -29,6 +29,19 @@
      </property>
      <item>
       <widget class="KanbanListWidget" name="todoList">
+       <property name="styleSheet">
+        <string notr="true">KanbanListWidget::item {
+    background-color: rgb(170, 255, 255);
+    color: black;    
+	border-radius: 10px;
+    padding: 5px;
+}
+
+KanbanListWidget::item:focus {
+    outline: none;
+}
+</string>
+       </property>
        <property name="frameShape">
         <enum>QFrame::Shape::NoFrame</enum>
        </property>
@@ -42,6 +55,15 @@
      </item>
      <item>
       <widget class="KanbanListWidget" name="inProgressList">
+       <property name="styleSheet">
+        <string notr="true">KanbanListWidget::item {
+    background-color: rgb(255, 255, 127);
+    color: black;    
+	border-radius: 10px;
+    padding: 5px;
+}
+</string>
+       </property>
        <property name="frameShape">
         <enum>QFrame::Shape::NoFrame</enum>
        </property>
@@ -55,6 +77,16 @@
      </item>
      <item>
       <widget class="KanbanListWidget" name="doneList">
+       <property name="styleSheet">
+        <string notr="true">KanbanListWidget::item {
+    background-color: rgb(170, 255, 127);
+    color: black;    
+	border-radius: 10px;
+    padding: 5px;
+}
+
+</string>
+       </property>
        <property name="frameShape">
         <enum>QFrame::Shape::NoFrame</enum>
        </property>
@@ -76,6 +108,9 @@
       <width>90</width>
       <height>29</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="text">
      <string>New task</string>
@@ -151,7 +186,7 @@ color: rgb(0, 0, 94);</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
