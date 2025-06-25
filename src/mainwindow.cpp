@@ -17,6 +17,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->inProgressList->setStatus(Status::InProgress);
     ui->doneList->setStatus(Status::Done);
 
+    ui->todoList->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->inProgressList->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->doneList->setContextMenuPolicy(Qt::CustomContextMenu);
+
     for (const Task &task : board->getTasks()) {
         addTaskToUI(task);
     }
@@ -34,6 +38,9 @@ void MainWindow::connectSignals() {
     connect(ui->todoList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
     connect(ui->inProgressList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
     connect(ui->doneList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
+    connect(ui->todoList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    connect(ui->inProgressList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    connect(ui->doneList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
 
 }
 
@@ -108,3 +115,27 @@ void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
     }
 }
 
+void MainWindow::showContextMenu(const QPoint &pos)
+{
+    QListWidget* list = qobject_cast<QListWidget*>(sender());
+    QListWidgetItem* item = list->itemAt(pos);
+    if (!item)
+        return;
+
+    QMenu contextMenu(this);
+
+    QAction* editAction = contextMenu.addAction("Edit");
+    QAction* deleteAction = contextMenu.addAction("Delete");
+
+    QAction* selectedAction = contextMenu.exec(list->viewport()->mapToGlobal(pos));
+    if (!selectedAction)
+        return;
+
+    if (selectedAction == editAction) {
+        QString taskTitle = item->text();
+        qDebug() << "Edytuj task:" << taskTitle;
+    }
+    else if (selectedAction == deleteAction) {
+        qDebug() << "Usuwam task:" << item->text();
+    }
+}

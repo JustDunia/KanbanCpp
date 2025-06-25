@@ -34,5 +34,6 @@ private:
     void connectSignals();
     void addTaskToUI(const Task &task);
     void onTaskDropped(const QUuid &id, Status newStatus);
+    void showContextMenu(const QPoint &pos);
 };
 #endif // MAINWINDOW_H
