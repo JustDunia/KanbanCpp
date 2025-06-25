@@ -156,6 +156,13 @@ void MainWindow::showContextMenu(const QPoint &pos)
         }
     }
     else if (selectedAction == deleteAction) {
-        qDebug() << "Usuwam task:" << item->text();
+        QUuid taskId = item->data(Qt::UserRole).toUuid();
+        Task* task = board->getTaskById(taskId);
+
+        if (task) {
+            board->removeTask(taskId);
+            delete list->takeItem(list->row(item));
+            board->saveToFile(fileName);
+        }
     }
 }
