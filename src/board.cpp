@@ -53,12 +53,12 @@ bool Board::loadFromFile(const QString &filename) {
 
     isLocked = false;
     if (lockFile.exists()) {
-        QMessageBox::warning(nullptr, "Plik zablokowany", "Inna instancja aplikacji edytuje plik.");
+        QMessageBox::warning(nullptr, "File locked", "Different user is editing file");
         isLocked = true;
     }
 
     if (!lockFile.open(QIODevice::WriteOnly)) {
-        QMessageBox::warning(nullptr, "Błąd blokady", "Nie udało się utworzyć pliku blokady.");
+        QMessageBox::warning(nullptr, "Lock error", "Could not open lock file");
         return false;
     }
 
@@ -66,7 +66,7 @@ bool Board::loadFromFile(const QString &filename) {
 
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::warning(nullptr, "Błąd pliku", "Nie udało się otworzyć pliku.");
+        QMessageBox::warning(nullptr, "File error", "Could not open file");
         return false;
     }
 
@@ -74,7 +74,7 @@ bool Board::loadFromFile(const QString &filename) {
     file.close();
 
     if (!doc.isArray()) {
-        QMessageBox::warning(nullptr, "Błąd formatu", "Plik nie zawiera poprawnych danych.");
+        QMessageBox::warning(nullptr, "Format error", "File has invalid data");
         return false;
     }
 
@@ -83,12 +83,10 @@ bool Board::loadFromFile(const QString &filename) {
     for (const auto &v : arr)
         tasks.append(Task::fromJson(v.toObject()));
 
-    if (tasks.empty()) {
-        QMessageBox::warning(nullptr, "Błąd danych", "Plik nie zawiera żadnych zadań.");
-        return false;
+    if (!tasks.empty()) {
+        emit taskAdded(tasks.last());
     }
 
-    emit taskAdded(tasks.last());
     emit readOnlyMode(isLocked);
 
     return true;
