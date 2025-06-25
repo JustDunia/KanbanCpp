@@ -18,20 +18,53 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>50</y>
+      <y>110</y>
       <width>771</width>
-      <height>491</height>
+      <height>431</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>15</number>
+     </property>
      <item>
-      <widget class="KanbanListWidget" name="todoList"/>
+      <widget class="KanbanListWidget" name="todoList">
+       <property name="frameShape">
+        <enum>QFrame::Shape::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
+       </property>
+       <property name="spacing">
+        <number>5</number>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="KanbanListWidget" name="inProgressList"/>
+      <widget class="KanbanListWidget" name="inProgressList">
+       <property name="frameShape">
+        <enum>QFrame::Shape::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
+       </property>
+       <property name="spacing">
+        <number>5</number>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="KanbanListWidget" name="doneList"/>
+      <widget class="KanbanListWidget" name="doneList">
+       <property name="frameShape">
+        <enum>QFrame::Shape::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
+       </property>
+       <property name="spacing">
+        <number>5</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -47,6 +80,69 @@
     <property name="text">
      <string>New task</string>
     </property>
+   </widget>
+   <widget class="QWidget" name="horizontalLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>771</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="styleSheet">
+        <string notr="true">font: 700 12pt &quot;Segoe Script&quot;;
+color: rgb(0, 0, 94);</string>
+       </property>
+       <property name="text">
+        <string>To do</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::PlainText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="styleSheet">
+        <string notr="true">font: 700 12pt &quot;Segoe Script&quot;;
+color: rgb(0, 0, 94);</string>
+       </property>
+       <property name="text">
+        <string>In Progress</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::PlainText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="styleSheet">
+        <string notr="true">font: 700 12pt &quot;Segoe Script&quot;;
+color: rgb(0, 0, 94);</string>
+       </property>
+       <property name="text">
+        <string>Done</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::TextFormat::PlainText</enum>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignmentFlag::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
