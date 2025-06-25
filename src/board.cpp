@@ -83,9 +83,9 @@ bool Board::loadFromFile(const QString &filename) {
     for (const auto &v : arr)
         tasks.append(Task::fromJson(v.toObject()));
 
-    if (!tasks.empty()) {
-        emit taskAdded(tasks.last());
-    }
+    // if (!tasks.empty()) {
+    //     emit taskAdded(tasks.last());
+    // }
 
     emit readOnlyMode(isLocked);
 
