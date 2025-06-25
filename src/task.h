@@ -15,6 +15,7 @@ public:
     QString title;
     QString description;
     Status status;
+    QDateTime createdAt;
 
     QJsonObject toJson() const;
     static Task fromJson(const QJsonObject &obj);

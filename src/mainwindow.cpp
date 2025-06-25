@@ -54,6 +54,7 @@ void MainWindow::addTaskToUI(const Task &task) {
     if (list) {
         QListWidgetItem *item = new QListWidgetItem(task.title);
         item->setData(Qt::UserRole, task.id);
+        item->setText(item->text() + "\n" + task.createdAt.toString("dd.MM.yyyy HH:mm"));
         list->addItem(item);
     }
 }
