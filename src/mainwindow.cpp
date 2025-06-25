@@ -6,6 +6,15 @@
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
+#include <QIcon>
+#include <QListWidgetItem>
+#include <QListWidget>
+#include <QAction>
+
+// Constants
+static const QString DEFAULT_FILENAME = "kanban.json";
+static const QString DATE_FORMAT = "dd.MM.yyyy HH:mm";
+static const QString ICON_PATH_TEMPLATE = ":/icons/%1.png";
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,17 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
     , reloadBtn(nullptr)
 {
     ui->setupUi(this);
-    connectSignals();
     setWindowTitle("Kanban App");
-    fileName = "kanban.json";
+    fileName = DEFAULT_FILENAME;
     
-    // Set up list properties before loading
-    ui->todoList->setStatus(Status::ToDo);
-    ui->inProgressList->setStatus(Status::InProgress);
-    ui->doneList->setStatus(Status::Done);
-    ui->todoList->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->inProgressList->setContextMenuPolicy(Qt::CustomContextMenu);
-    ui->doneList->setContextMenuPolicy(Qt::CustomContextMenu);
+    setupListWidgets();
+    connectSignals();
     
     // Load data after UI is fully set up
     board->loadFromFile(fileName);
@@ -75,27 +78,10 @@ void MainWindow::onReadOnlyMode(bool readOnly){
 }
 
 void MainWindow::addTaskToUI(const Task &task) {
-    KanbanListWidget *list = nullptr;
-    switch (task.status) {
-        case Status::ToDo: list = ui->todoList; break;
-        case Status::InProgress: list = ui->inProgressList; break;
-        case Status::Done: list = ui->doneList; break;
-    }
-    if (list) {
-        QListWidgetItem *item = new QListWidgetItem(task.title);
-        item->setData(Qt::UserRole, task.id);
-        item->setData(Qt::UserRole + 1, static_cast<int>(task.priority));
-        item->setToolTip(task.description.isEmpty() ? task.title : task.description);
-        std::string icon;
-        switch (task.priority) {
-            case Priority::Low:     icon = "low"; break;
-            case Priority::Medium:  icon = "medium"; break;
-            case Priority::High:    icon = "high"; break;
-        }
-        QString iconPath = QString::fromStdString(":/icons/" + icon + ".png");
-        QIcon iconEl(iconPath);
-        item->setIcon(iconEl);
-        item->setText(item->text() + "\n" + task.createdAt.toString("dd.MM.yyyy HH:mm"));
+    KanbanListWidget *list = getListForStatus(task.status);
+    if (!list) return;
+    
+    QListWidgetItem *item = createTaskListItem(task);
 
         if(list->count() == 0){
             list->addItem(item);
@@ -108,16 +94,15 @@ void MainWindow::addTaskToUI(const Task &task) {
             int taskPriority = static_cast<int>(task.priority);
             int existingPriority = existingItem->data(Qt::UserRole + 1).toInt();
 
-            if (taskPriority > existingPriority) {
-                list->insertItem(i, item);
-                inserted = true;
-                break;
-            }
+        if (taskPriority > existingPriority) {
+            list->insertItem(i, item);
+            inserted = true;
+            break;
         }
+    }
 
-        if (!inserted) {
-            list->addItem(item);
-        }
+    if (!inserted) {
+        list->addItem(item);
     }
 }
 
@@ -173,12 +158,7 @@ void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
         task->status = newStatus;
         
         // Only reorder tasks in the destination list to maintain priority ordering
-        KanbanListWidget *destinationList = nullptr;
-        switch (newStatus) {
-            case Status::ToDo: destinationList = ui->todoList; break;
-            case Status::InProgress: destinationList = ui->inProgressList; break;
-            case Status::Done: destinationList = ui->doneList; break;
-        }
+        KanbanListWidget *destinationList = getListForStatus(newStatus);
         
         if (destinationList) {
             // Clear and reload only the destination list
@@ -213,36 +193,11 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
     if (selectedAction == editAction) {
         QUuid taskId = item->data(Qt::UserRole).toUuid();
-        Task* task = board->getTaskById(taskId);
-
-        if (!task) return;
-
-        QString currentTitle = task->title;
-        QString currentDescription = task->description;
-        Priority currentPriority = task->priority;
-
-        EditForm dlg(this);
-        dlg.setTitle(currentTitle);
-        dlg.setDescription(currentDescription);
-        dlg.setPriority(currentPriority);
-
-        if (dlg.exec() == QDialog::Accepted) {
-            QString newTitle = dlg.getTitle();
-            QString newDesc = dlg.getDescription();
-            Priority newPriority = dlg.getPriority();
-            Task newTask(newTitle, newDesc, task->status, newPriority);
-            newTask.id = task->id;
-            newTask.createdAt = task->createdAt;
-            board->updateTask(task, newTask);
-        }
+        editTask(taskId);
     }
     else if (selectedAction == deleteAction) {
         QUuid taskId = item->data(Qt::UserRole).toUuid();
-        Task* task = board->getTaskById(taskId);
-
-        if (task) {
-            board->removeTask(taskId);
-        }
+        deleteTask(taskId);
     }
 }
 
@@ -264,5 +219,75 @@ void MainWindow::onReloadClicked()
         }
     } else {
         QMessageBox::warning(this, "Reload Error", "Failed to reload data from file. Please check if the file exists and is accessible.");
+    }
+}
+
+void MainWindow::setupListWidgets()
+{
+    ui->todoList->setStatus(Status::ToDo);
+    ui->inProgressList->setStatus(Status::InProgress);
+    ui->doneList->setStatus(Status::Done);
+    ui->todoList->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->inProgressList->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->doneList->setContextMenuPolicy(Qt::CustomContextMenu);
+}
+
+KanbanListWidget* MainWindow::getListForStatus(Status status)
+{
+    switch (status) {
+        case Status::ToDo: return ui->todoList;
+        case Status::InProgress: return ui->inProgressList;
+        case Status::Done: return ui->doneList;
+        default: return nullptr;
+    }
+}
+
+QListWidgetItem* MainWindow::createTaskListItem(const Task &task)
+{
+    QListWidgetItem *item = new QListWidgetItem(task.title);
+    item->setData(Qt::UserRole, task.id);
+    item->setData(Qt::UserRole + 1, static_cast<int>(task.priority));
+    item->setToolTip(task.description.isEmpty() ? task.title : task.description);
+    
+    QString iconName;
+    switch (task.priority) {
+        case Priority::Low:     iconName = "low"; break;
+        case Priority::Medium:  iconName = "medium"; break;
+        case Priority::High:    iconName = "high"; break;
+    }
+    QString iconPath = ICON_PATH_TEMPLATE.arg(iconName);
+    item->setIcon(QIcon(iconPath));
+    
+    item->setText(item->text() + "\n" + task.createdAt.toString(DATE_FORMAT));
+    
+    return item;
+}
+
+void MainWindow::editTask(const QUuid &taskId)
+{
+    Task* task = board->getTaskById(taskId);
+    if (!task) return;
+
+    EditForm dlg(this);
+    dlg.setTitle(task->title);
+    dlg.setDescription(task->description);
+    dlg.setPriority(task->priority);
+
+    if (dlg.exec() == QDialog::Accepted) {
+        QString newTitle = dlg.getTitle();
+        QString newDesc = dlg.getDescription();
+        Priority newPriority = dlg.getPriority();
+        Task newTask(newTitle, newDesc, task->status, newPriority);
+        newTask.id = task->id;
+        newTask.createdAt = task->createdAt;
+        board->updateTask(task, newTask);
+    }
+}
+
+void MainWindow::deleteTask(const QUuid &taskId)
+{
+    Task* task = board->getTaskById(taskId);
+    if (task) {
+        board->removeTask(taskId);
     }
 }
