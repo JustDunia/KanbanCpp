@@ -4,14 +4,14 @@
         "description": "",
         "id": "{0269aaf7-2e35-4a1c-9720-c11313bc2ff7}",
         "priority": 0,
-        "status": 0,
+        "status": 2,
         "title": "test"
     },
     {
         "createdAt": "2025-06-25T12:49:59",
         "description": "",
         "id": "{6ea3f550-9966-4058-bd98-d058e1c1b942}",
-        "priority": 0,
+        "priority": 1,
         "status": 0,
         "title": "test2"
     },
@@ -19,7 +19,7 @@
         "createdAt": "2025-06-25T12:51:11",
         "description": "",
         "id": "{3a897f31-fe92-45e3-b10e-4503b78de5fd}",
-        "priority": 0,
+        "priority": 2,
         "status": 0,
         "title": "test4"
     },
@@ -28,7 +28,7 @@
         "description": "",
         "id": "{17f0c6ce-9d5f-4077-9408-68b927da495f}",
         "priority": 0,
-        "status": 2,
+        "status": 0,
         "title": "test1"
     },
     {
@@ -36,7 +36,7 @@
         "description": "",
         "id": "{566f7fe9-a067-4070-b35a-d2799c95be81}",
         "priority": 1,
-        "status": 0,
+        "status": 1,
         "title": "test 0"
     },
     {
@@ -44,7 +44,15 @@
         "description": "a",
         "id": "{7d475af4-67a3-4d1f-96fe-16b3d70d56e0}",
         "priority": 2,
-        "status": 0,
+        "status": 2,
         "title": "test 6"
+    },
+    {
+        "createdAt": "2025-06-25T15:04:15",
+        "description": "",
+        "id": "{4735d17e-338b-4a01-9329-2933c041e21c}",
+        "priority": 1,
+        "status": 2,
+        "title": "średnie"
     }
 ]

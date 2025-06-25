@@ -18,6 +18,7 @@ public:
     const QVector<Task>& getTasks() const;
     bool loadFromFile(const QString &filename);
     bool saveToFile(const QString &filename) const;
+    void sortTasksByPriority();
 
 signals:
     void taskAdded(const Task &task);

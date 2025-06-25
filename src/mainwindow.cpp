@@ -54,6 +54,7 @@ void MainWindow::addTaskToUI(const Task &task) {
     if (list) {
         QListWidgetItem *item = new QListWidgetItem(task.title);
         item->setData(Qt::UserRole, task.id);
+        item->setData(Qt::UserRole + 1, static_cast<int>(task.priority));
         std::string icon;
         switch (task.priority) {
             case Priority::Low:     icon = "low"; break;
@@ -64,7 +65,28 @@ void MainWindow::addTaskToUI(const Task &task) {
         QIcon iconEl(iconPath);
         item->setIcon(iconEl);
         item->setText(item->text() + "\n" + task.createdAt.toString("dd.MM.yyyy HH:mm"));
-        list->addItem(item);
+
+        if(list->count() == 0){
+            list->addItem(item);
+            return;
+        }
+
+        bool inserted = false;
+        for (int i = 0; i < list->count(); ++i) {
+            auto *existingItem = list->item(i);
+            int taskPriority = static_cast<int>(task.priority);
+            int existingPriority = existingItem->data(Qt::UserRole + 1).toInt();
+
+            if (taskPriority > existingPriority) {
+                list->insertItem(i, item);
+                inserted = true;
+                break;
+            }
+        }
+
+        if (!inserted) {
+            list->addItem(item);
+        }
     }
 }
 

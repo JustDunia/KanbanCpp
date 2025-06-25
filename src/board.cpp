@@ -73,3 +73,10 @@ bool Board::saveToFile(const QString &filename) const {
     file.write(doc.toJson());
     return true;
 }
+
+void Board::sortTasksByPriority()
+{
+    std::sort(tasks.begin(), tasks.end(), [](const Task& task1, const Task& task2) {
+        return task1.priority > task2.priority;
+    });
+}
