@@ -24,10 +24,12 @@ void Board::removeTask(const QUuid &id) {
 }
 
 void Board::updateTask(Task *currentTask, Task newTask){
-    if(currentTask && !newTask.title.isEmpty() && (currentTask->title != newTask.title || currentTask->description != newTask.description) ){
+    if(currentTask && !newTask.title.isEmpty() && (currentTask->title != newTask.title || currentTask->description != newTask.description || currentTask->priority != newTask.priority) ){
         currentTask->title = newTask.title;
         currentTask->description = newTask.description;
-        emit taskUpdated();
+        currentTask->priority = newTask.priority;
+        newTask.id = currentTask->id;
+        emit taskUpdated(newTask);
     }
 }
 

@@ -1,6 +1,7 @@
 #ifndef EDITFORM_H
 #define EDITFORM_H
 
+#include "priority.h"
 #include <QDialog>
 
 namespace Ui {
@@ -20,7 +21,8 @@ public:
 
     QString getTitle() const;
     QString getDescription() const;
-
+    Priority getPriority() const;
+    void setPriority(const Priority &priority);
 private:
     Ui::EditForm *ui;
 };

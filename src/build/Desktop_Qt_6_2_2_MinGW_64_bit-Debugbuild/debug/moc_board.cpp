@@ -60,12 +60,12 @@ static const uint qt_meta_data_Board[] = {
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
        1,    1,   32,    2, 0x06,    1 /* Public */,
        5,    1,   35,    2, 0x06,    3 /* Public */,
-       7,    0,   38,    2, 0x06,    5 /* Public */,
+       7,    1,   38,    2, 0x06,    5 /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void, QMetaType::QUuid,    6,
-    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 3,    4,
 
        0        // eod
 };
@@ -78,7 +78,7 @@ void Board::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void 
         switch (_id) {
         case 0: _t->taskAdded((*reinterpret_cast< const Task(*)>(_a[1]))); break;
         case 1: _t->taskRemoved((*reinterpret_cast< const QUuid(*)>(_a[1]))); break;
-        case 2: _t->taskUpdated(); break;
+        case 2: _t->taskUpdated((*reinterpret_cast< const Task(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -98,7 +98,7 @@ void Board::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void 
             }
         }
         {
-            using _t = void (Board::*)();
+            using _t = void (Board::*)(const Task & );
             if (*reinterpret_cast<_t *>(_a[1]) == static_cast<_t>(&Board::taskUpdated)) {
                 *result = 2;
                 return;
@@ -114,7 +114,7 @@ const QMetaObject Board::staticMetaObject = { {
     qt_static_metacall,
     nullptr,
 qt_incomplete_metaTypeArray<qt_meta_stringdata_Board_t
-, QtPrivate::TypeAndForceComplete<Board, std::true_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<const Task &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<const QUuid &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>
+, QtPrivate::TypeAndForceComplete<Board, std::true_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<const Task &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<const QUuid &, std::false_type>, QtPrivate::TypeAndForceComplete<void, std::false_type>, QtPrivate::TypeAndForceComplete<const Task &, std::false_type>
 
 
 
@@ -168,9 +168,10 @@ void Board::taskRemoved(const QUuid & _t1)
 }
 
 // SIGNAL 2
-void Board::taskUpdated()
+void Board::taskUpdated(const Task & _t1)
 {
-    QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(std::addressof(_t1))) };
+    QMetaObject::activate(this, &staticMetaObject, 2, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

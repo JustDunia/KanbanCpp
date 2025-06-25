@@ -21,7 +21,7 @@ public:
 private slots:
     void onTaskAdded(const Task &task);
     void onTaskRemoved(const QUuid &id);
-    void onTaskUpdated();
+    void onTaskUpdated(const Task &task);
 
     void on_addBtn_clicked();
 

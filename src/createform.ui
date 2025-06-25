@@ -35,7 +35,7 @@
      <x>30</x>
      <y>20</y>
      <width>301</width>
-     <height>181</height>
+     <height>201</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -48,6 +48,16 @@
     </item>
     <item>
      <widget class="QLineEdit" name="titleLineEdit"/>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Priority</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="priority"/>
     </item>
     <item>
      <widget class="QLabel" name="label_2">

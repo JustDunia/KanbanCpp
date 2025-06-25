@@ -23,6 +23,7 @@ HEADERS += \
     editform.h \
     kanbanlistwidget.h \
     mainwindow.h \
+    priority.h \
     status.h \
     task.h
 

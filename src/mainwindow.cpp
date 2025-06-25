@@ -47,13 +47,22 @@ void MainWindow::connectSignals() {
 void MainWindow::addTaskToUI(const Task &task) {
     KanbanListWidget *list = nullptr;
     switch (task.status) {
-    case Status::ToDo: list = ui->todoList; break;
-    case Status::InProgress: list = ui->inProgressList; break;
-    case Status::Done: list = ui->doneList; break;
+        case Status::ToDo: list = ui->todoList; break;
+        case Status::InProgress: list = ui->inProgressList; break;
+        case Status::Done: list = ui->doneList; break;
     }
     if (list) {
         QListWidgetItem *item = new QListWidgetItem(task.title);
         item->setData(Qt::UserRole, task.id);
+        std::string icon;
+        switch (task.priority) {
+            case Priority::Low:     icon = "low"; break;
+            case Priority::Medium:  icon = "medium"; break;
+            case Priority::High:    icon = "high"; break;
+        }
+        QString iconPath = QString::fromStdString(":/icons/" + icon + ".png");
+        QIcon iconEl(iconPath);
+        item->setIcon(iconEl);
         item->setText(item->text() + "\n" + task.createdAt.toString("dd.MM.yyyy HH:mm"));
         list->addItem(item);
     }
@@ -64,8 +73,19 @@ void MainWindow::onTaskAdded(const Task &task) {
     board->saveToFile(fileName);
 }
 
-void MainWindow::onTaskUpdated() {
-    board->saveToFile(fileName);
+void MainWindow::onTaskUpdated(const Task &task) {
+    QList<KanbanListWidget*> lists = { ui->todoList, ui->inProgressList, ui->doneList };
+    for (KanbanListWidget *list : lists) {
+        for (int i = 0; i < list->count(); ++i) {
+            auto *item = list->item(i);
+            if (item->data(Qt::UserRole).toUuid() == task.id) {
+                delete list->takeItem(i);
+                addTaskToUI(task);
+                board->saveToFile(fileName);
+                return;
+            }
+        }
+    }
 }
 
 void MainWindow::onTaskRemoved(const QUuid &id) {
@@ -124,21 +144,19 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
         QString currentTitle = task->title;
         QString currentDescription = task->description;
+        Priority currentPriority = task->priority;
 
         EditForm dlg(this);
         dlg.setTitle(currentTitle);
         dlg.setDescription(currentDescription);
+        dlg.setPriority(currentPriority);
 
         if (dlg.exec() == QDialog::Accepted) {
             QString newTitle = dlg.getTitle();
             QString newDesc = dlg.getDescription();
-
-            if (!newTitle.isEmpty() && (newTitle != currentTitle || newDesc != currentDescription)) {
-                item->setText(newTitle);
-                task->title = newTitle;
-                task->description = newDesc;
-                board->saveToFile(fileName);
-            }
+            Priority newPriority = dlg.getPriority();
+            Task newTask(newTitle, newDesc, task->status, newPriority);
+            board->updateTask(task, newTask);
         }
     }
     else if (selectedAction == deleteAction) {

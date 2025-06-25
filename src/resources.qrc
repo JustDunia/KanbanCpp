@@ -2,5 +2,9 @@
     <qresource prefix="/icons">
         <file>delete.png</file>
         <file>edit.png</file>
+        <file>arrow.png</file>
+        <file>high.png</file>
+        <file>low.png</file>
+        <file>medium.png</file>
     </qresource>
 </RCC>

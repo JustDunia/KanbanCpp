@@ -22,7 +22,7 @@ public:
 signals:
     void taskAdded(const Task &task);
     void taskRemoved(const QUuid &id);
-    void taskUpdated();
+    void taskUpdated(const Task &task);
 
 private:
     QVector<Task> tasks;

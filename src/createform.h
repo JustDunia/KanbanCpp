@@ -1,6 +1,7 @@
 #ifndef CREATEFORM_H
 #define CREATEFORM_H
 
+#include "priority.h"
 #include <QDialog>
 
 namespace Ui {
@@ -17,7 +18,8 @@ public:
 
     QString getTitle() const;
     QString getDescription() const;
-
+    Priority getPriority() const;
+    void setPriority(Priority priority);
 private:
     Ui::CreateForm *ui;
 };

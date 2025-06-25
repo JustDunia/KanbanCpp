@@ -62,6 +62,34 @@ int main(int argc, char *argv[])
             border: 1px solid #3498db;
             background-color: #f0faff;
         }
+
+        /* === QComboBox === */
+        QComboBox {
+            background-color: #ffffff;
+            color: #2c3e50;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px;
+            font-size: 14px;
+        }
+
+        QComboBox::drop-down {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+        }
+
+        QComboBox::down-arrow {
+            image: url(:/icons/arrow.png);
+            width: 30px;
+            height: 30px;
+        }
+
+        QComboBox:focus {
+            border: 1px solid #3498db;
+            background-color: #f0faff;
+        }
     )";
 
     a.setStyleSheet(globalStyle);
