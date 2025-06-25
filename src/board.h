@@ -13,19 +13,16 @@ public:
 
     void addTask(Task task);
     void removeTask(const QUuid &id);
+    void updateTask(Task *currentTask, Task newTask);
     Task* getTaskById(const QUuid &id);
-    QVector<Task> getTasksByStatus(Status status) const;
     const QVector<Task>& getTasks() const;
-
-
     bool loadFromFile(const QString &filename);
     bool saveToFile(const QString &filename) const;
 
 signals:
     void taskAdded(const Task &task);
     void taskRemoved(const QUuid &id);
-    void taskUpdated(const Task &task);
-    void taskMoved();
+    void taskUpdated();
 
 private:
     QVector<Task> tasks;

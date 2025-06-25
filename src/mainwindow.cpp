@@ -63,23 +63,8 @@ void MainWindow::onTaskAdded(const Task &task) {
     board->saveToFile(fileName);
 }
 
-void MainWindow::onTaskMoved(){
+void MainWindow::onTaskUpdated() {
     board->saveToFile(fileName);
-}
-
-void MainWindow::onTaskUpdated(const Task &task) {
-    QList<KanbanListWidget*> lists = { ui->todoList, ui->inProgressList, ui->doneList };
-    for (KanbanListWidget *list : lists) {
-        for (int i = 0; i < list->count(); ++i) {
-            auto *item = list->item(i);
-            if (item->data(Qt::UserRole).toUuid() == task.id) {
-                list->takeItem(i);
-                delete item;
-                addTaskToUI(task);
-                return;
-            }
-        }
-    }
 }
 
 void MainWindow::onTaskRemoved(const QUuid &id) {
@@ -89,6 +74,7 @@ void MainWindow::onTaskRemoved(const QUuid &id) {
             auto *item = list->item(i);
             if (item->data(Qt::UserRole).toUuid() == id) {
                 delete list->takeItem(i);
+                board->saveToFile(fileName);
                 return;
             }
         }
@@ -98,7 +84,6 @@ void MainWindow::onTaskRemoved(const QUuid &id) {
 void MainWindow::on_addBtn_clicked()
 {
     CreateForm form(this);
-    form.setWindowTitle("New task");
     if (form.exec() == QDialog::Accepted) {
         QString title = form.getTitle();
         QString description = form.getDescription();
@@ -161,8 +146,6 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
         if (task) {
             board->removeTask(taskId);
-            delete list->takeItem(list->row(item));
-            board->saveToFile(fileName);
         }
     }
 }

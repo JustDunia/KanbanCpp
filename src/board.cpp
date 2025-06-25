@@ -3,7 +3,6 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QIODevice>
-#include <QDir>
 
 Board::Board(QObject *parent)
     : QObject{parent}
@@ -24,19 +23,19 @@ void Board::removeTask(const QUuid &id) {
     }
 }
 
+void Board::updateTask(Task *currentTask, Task newTask){
+    if(currentTask && !newTask.title.isEmpty() && (currentTask->title != newTask.title || currentTask->description != newTask.description) ){
+        currentTask->title = newTask.title;
+        currentTask->description = newTask.description;
+        emit taskUpdated();
+    }
+}
+
 Task* Board::getTaskById(const QUuid &id) {
     for (Task &t : tasks)
         if (t.id == id)
             return &t;
     return nullptr;
-}
-
-QVector<Task> Board::getTasksByStatus(Status status) const {
-    QVector<Task> result;
-    for (const Task &t : tasks)
-        if (t.status == status)
-            result.append(t);
-    return result;
 }
 
 const QVector<Task>& Board::getTasks() const {
@@ -49,13 +48,14 @@ bool Board::loadFromFile(const QString &filename) {
     if (!file.open(QIODevice::ReadOnly))
         return false;
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-    // qDebug() << "Current dir:" << doc.
     if (!doc.isArray())
         return false;
     tasks.clear();
     QJsonArray arr = doc.array();
     for (const auto &v : arr)
         tasks.append(Task::fromJson(v.toObject()));
+    if(tasks.empty())
+        return false;
     emit taskAdded(tasks.last());
     return true;
 }
