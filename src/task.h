@@ -5,6 +5,8 @@
 #define TASK_H
 #include <QString>
 #include <QJsonObject>
+#include <QUuid>
+#include <QDateTime>
 #include "status.h"
 
 class Task

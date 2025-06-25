@@ -1,6 +1,7 @@
 #include "createform.h"
 #include "priority.h"
 #include "ui_createform.h"
+#include <QMessageBox>
 
 CreateForm::CreateForm(QWidget *parent)
     : QDialog(parent)
@@ -10,6 +11,7 @@ CreateForm::CreateForm(QWidget *parent)
     ui->priority->addItem("Low", QVariant::fromValue(Priority::Low));
     ui->priority->addItem("Medium", QVariant::fromValue(Priority::Medium));
     ui->priority->addItem("High", QVariant::fromValue(Priority::High));
+    ui->priority->setCurrentIndex(0);
 }
 
 CreateForm::~CreateForm()
@@ -34,4 +36,12 @@ void CreateForm::setPriority(Priority priority) {
     if (index != -1) {
         ui->priority->setCurrentIndex(index);
     }
+}
+
+void CreateForm::accept() {
+    if (ui->titleLineEdit->text().trimmed().isEmpty()) {
+        QMessageBox::warning(this, "Validation Error", "Title is required and cannot be empty.");
+        return;
+    }
+    QDialog::accept();
 }

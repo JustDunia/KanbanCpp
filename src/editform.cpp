@@ -1,6 +1,7 @@
 #include "editform.h"
 #include "priority.h"
 #include "ui_editform.h"
+#include <QMessageBox>
 
 EditForm::EditForm(QWidget *parent)
     : QDialog(parent)
@@ -46,4 +47,12 @@ QString EditForm::getDescription() const
 
 Priority EditForm::getPriority() const {
     return ui->priority->currentData().value<Priority>();
+}
+
+void EditForm::accept() {
+    if (ui->titleLineEdit->text().trimmed().isEmpty()) {
+        QMessageBox::warning(this, "Validation Error", "Title is required and cannot be empty.");
+        return;
+    }
+    QDialog::accept();
 }

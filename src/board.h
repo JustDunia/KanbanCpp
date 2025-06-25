@@ -20,6 +20,7 @@ public:
     bool saveToFile(const QString &filename) const;
     void sortTasksByPriority();
     void releaseLock(const QString &filename);
+    bool tryReload(const QString &filename);
 
     bool isLocked;
 

@@ -4,26 +4,30 @@
 #include "ui_mainwindow.h"
 #include <QStandardPaths>
 #include <QFileDialog>
+#include <QMenu>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , board(new Board(this))
+    , reloadBtn(nullptr)
 {
     ui->setupUi(this);
     connectSignals();
     setWindowTitle("Kanban App");
-    fileName = QFileDialog::getOpenFileName(this, tr("Open Kanban File"), "", tr("Kanban Files (*.json);;All Files (*)"));
-    if (fileName.isEmpty()) {
-        fileName = "kanban.json";
-    }
-    board->loadFromFile(fileName);
+    fileName = "kanban.json";
+    
+    // Set up list properties before loading
     ui->todoList->setStatus(Status::ToDo);
     ui->inProgressList->setStatus(Status::InProgress);
     ui->doneList->setStatus(Status::Done);
     ui->todoList->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->inProgressList->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->doneList->setContextMenuPolicy(Qt::CustomContextMenu);
+    
+    // Load data after UI is fully set up
+    board->loadFromFile(fileName);
 
     for (const Task &task : board->getTasks()) {
         addTaskToUI(task);
@@ -50,10 +54,24 @@ void MainWindow::connectSignals() {
 }
 
 void MainWindow::onReadOnlyMode(bool readOnly){
-    ui->addBtn->setDisabled(readOnly);
     ui->todoList->setDragEnabled(!readOnly);
     ui->inProgressList->setDragEnabled(!readOnly);
     ui->doneList->setDragEnabled(!readOnly);
+    
+    if (readOnly) {
+        ui->addBtn->hide();
+        if (!reloadBtn) {
+            reloadBtn = new QPushButton("Reload", this);
+            connect(reloadBtn, &QPushButton::clicked, this, &MainWindow::onReloadClicked);
+            reloadBtn->setGeometry(ui->addBtn->geometry());
+        }
+        reloadBtn->show();
+    } else {
+        ui->addBtn->show();
+        if (reloadBtn) {
+            reloadBtn->hide();
+        }
+    }
 }
 
 void MainWindow::addTaskToUI(const Task &task) {
@@ -67,6 +85,7 @@ void MainWindow::addTaskToUI(const Task &task) {
         QListWidgetItem *item = new QListWidgetItem(task.title);
         item->setData(Qt::UserRole, task.id);
         item->setData(Qt::UserRole + 1, static_cast<int>(task.priority));
+        item->setToolTip(task.description.isEmpty() ? task.title : task.description);
         std::string icon;
         switch (task.priority) {
             case Priority::Low:     icon = "low"; break;
@@ -142,7 +161,8 @@ void MainWindow::on_addBtn_clicked()
     if (form.exec() == QDialog::Accepted) {
         QString title = form.getTitle();
         QString description = form.getDescription();
-        Task task(title, description);
+        Priority priority = form.getPriority();
+        Task task(title, description, Status::ToDo, priority);
         board->addTask(task);
     }
 }
@@ -151,6 +171,25 @@ void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
     Task *task = board->getTaskById(id);
     if (task && task->status != newStatus) {
         task->status = newStatus;
+        
+        // Only reorder tasks in the destination list to maintain priority ordering
+        KanbanListWidget *destinationList = nullptr;
+        switch (newStatus) {
+            case Status::ToDo: destinationList = ui->todoList; break;
+            case Status::InProgress: destinationList = ui->inProgressList; break;
+            case Status::Done: destinationList = ui->doneList; break;
+        }
+        
+        if (destinationList) {
+            // Clear and reload only the destination list
+            destinationList->clear();
+            for (const Task &taskItem : board->getTasks()) {
+                if (taskItem.status == newStatus) {
+                    addTaskToUI(taskItem);
+                }
+            }
+        }
+        
         board->saveToFile(fileName);
     }
 }
@@ -192,6 +231,8 @@ void MainWindow::showContextMenu(const QPoint &pos)
             QString newDesc = dlg.getDescription();
             Priority newPriority = dlg.getPriority();
             Task newTask(newTitle, newDesc, task->status, newPriority);
+            newTask.id = task->id;
+            newTask.createdAt = task->createdAt;
             board->updateTask(task, newTask);
         }
     }
@@ -202,5 +243,26 @@ void MainWindow::showContextMenu(const QPoint &pos)
         if (task) {
             board->removeTask(taskId);
         }
+    }
+}
+
+void MainWindow::onReloadClicked()
+{
+    if (board->tryReload(fileName)) {
+        ui->todoList->clear();
+        ui->inProgressList->clear();
+        ui->doneList->clear();
+        
+        for (const Task &task : board->getTasks()) {
+            addTaskToUI(task);
+        }
+        
+        if (board->isLocked) {
+            QMessageBox::information(this, "Reload", "Data reloaded successfully. File is still locked by another instance.");
+        } else {
+            QMessageBox::information(this, "Reload", "Data reloaded successfully. File lock acquired - you can now edit tasks.");
+        }
+    } else {
+        QMessageBox::warning(this, "Reload Error", "Failed to reload data from file. Please check if the file exists and is accessible.");
     }
 }

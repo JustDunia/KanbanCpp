@@ -20,6 +20,10 @@ public:
     QString getDescription() const;
     Priority getPriority() const;
     void setPriority(Priority priority);
+
+public slots:
+    void accept() override;
+
 private:
     Ui::CreateForm *ui;
 };

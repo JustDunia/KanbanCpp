@@ -3,6 +3,7 @@
 
 #include "board.h"
 #include <QMainWindow>
+#include <QPushButton>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,10 +25,13 @@ private slots:
     void onTaskUpdated(const Task &task);
     void on_addBtn_clicked();
     void onReadOnlyMode(bool readOnly);
+    void onReloadClicked();
+
 private:
     Ui::MainWindow *ui;
     Board *board;
     QString fileName;
+    QPushButton *reloadBtn;
 
     void connectSignals();
     void addTaskToUI(const Task &task);

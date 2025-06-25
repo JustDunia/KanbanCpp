@@ -3,11 +3,11 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QIODevice>
-#include <QLockFile>
 #include <QMessageBox>
+#include <algorithm>
 
 Board::Board(QObject *parent)
-    : QObject{parent}
+    : QObject{parent}, isLocked(false)
 {}
 
 void Board::addTask(Task task) {
@@ -30,7 +30,9 @@ void Board::updateTask(Task *currentTask, Task newTask){
         currentTask->title = newTask.title;
         currentTask->description = newTask.description;
         currentTask->priority = newTask.priority;
+        currentTask->status = newTask.status;
         newTask.id = currentTask->id;
+        newTask.createdAt = currentTask->createdAt;
         emit taskUpdated(newTask);
     }
 }
@@ -57,14 +59,23 @@ bool Board::loadFromFile(const QString &filename) {
         isLocked = true;
     }
 
-    if (!lockFile.open(QIODevice::WriteOnly)) {
-        QMessageBox::warning(nullptr, "Lock error", "Could not open lock file");
-        return false;
+    if (!isLocked && !lockFile.open(QIODevice::WriteOnly)) {
+        QMessageBox::warning(nullptr, "Lock error", "Could not create lock file");
+        isLocked = true;
     }
 
-    lockFile.close();
+    if (lockFile.isOpen()) {
+        lockFile.close();
+    }
 
     QFile file(filename);
+    if (!file.exists()) {
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write("[]");
+            file.close();
+        }
+    }
+    
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::warning(nullptr, "File error", "Could not open file");
         return false;
@@ -83,10 +94,6 @@ bool Board::loadFromFile(const QString &filename) {
     for (const auto &v : arr)
         tasks.append(Task::fromJson(v.toObject()));
 
-    // if (!tasks.empty()) {
-    //     emit taskAdded(tasks.last());
-    // }
-
     emit readOnlyMode(isLocked);
 
     return true;
@@ -103,6 +110,10 @@ void Board::releaseLock(const QString &filename) {
 }
 
 bool Board::saveToFile(const QString &filename) const {
+    if (isLocked) {
+        return false; // Cannot save if file is locked
+    }
+    
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
         return false;
@@ -111,6 +122,7 @@ bool Board::saveToFile(const QString &filename) const {
         arr.append(t.toJson());
     QJsonDocument doc(arr);
     file.write(doc.toJson());
+    file.close();
     return true;
 }
 
@@ -119,4 +131,40 @@ void Board::sortTasksByPriority()
     std::sort(tasks.begin(), tasks.end(), [](const Task& task1, const Task& task2) {
         return task1.priority > task2.priority;
     });
+}
+
+bool Board::tryReload(const QString &filename) {
+    QString lockFilePath = filename + ".lock";
+    QFile lockFile(lockFilePath);
+
+    if (lockFile.exists()) {
+        isLocked = true;
+    } else {
+        isLocked = false;
+        if (!lockFile.open(QIODevice::WriteOnly)) {
+            isLocked = true;
+        } else {
+            lockFile.close();
+        }
+    }
+
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return false;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+
+    if (!doc.isArray()) {
+        return false;
+    }
+
+    tasks.clear();
+    QJsonArray arr = doc.array();
+    for (const auto &v : arr)
+        tasks.append(Task::fromJson(v.toObject()));
+
+    emit readOnlyMode(isLocked);
+    return true;
 }
