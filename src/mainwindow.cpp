@@ -19,7 +19,7 @@ static const QString ICON_PATH_TEMPLATE = ":/icons/%1.png";
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , board(new Board(this))
+    , controller(new KanbanController(this))
     , reloadBtn(nullptr)
 {
     ui->setupUi(this);
@@ -30,9 +30,9 @@ MainWindow::MainWindow(QWidget *parent)
     connectSignals();
     
     // Load data after UI is fully set up
-    board->loadFromFile(fileName);
+    controller->loadFromFile(fileName);
 
-    for (const Task &task : board->getTasks()) {
+    for (const Task &task : controller->getTasks()) {
         addTaskToUI(task);
     }
 }
@@ -40,20 +40,20 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
-    board->releaseLock(fileName);
+    controller->releaseLock(fileName);
 }
 
 void MainWindow::connectSignals() {
-    connect(board, &Board::taskAdded, this, &MainWindow::onTaskAdded);
-    connect(board, &Board::taskRemoved, this, &MainWindow::onTaskRemoved);
-    connect(board, &Board::taskUpdated, this, &MainWindow::onTaskUpdated);
+    connect(controller, &KanbanController::taskAdded, this, &MainWindow::onTaskAdded);
+    connect(controller, &KanbanController::taskRemoved, this, &MainWindow::onTaskRemoved);
+    connect(controller, &KanbanController::taskUpdated, this, &MainWindow::onTaskUpdated);
     connect(ui->todoList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
     connect(ui->inProgressList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
     connect(ui->doneList, &KanbanListWidget::taskDropped, this, &MainWindow::onTaskDropped);
     connect(ui->todoList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
     connect(ui->inProgressList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
     connect(ui->doneList, &QWidget::customContextMenuRequested, this, &MainWindow::showContextMenu);
-    connect(board, &Board::readOnlyMode, this, &MainWindow::onReadOnlyMode);
+    connect(controller, &KanbanController::readOnlyMode, this, &MainWindow::onReadOnlyMode);
 }
 
 void MainWindow::onReadOnlyMode(bool readOnly){
@@ -108,7 +108,7 @@ void MainWindow::addTaskToUI(const Task &task) {
 
 void MainWindow::onTaskAdded(const Task &task) {
     addTaskToUI(task);
-    board->saveToFile(fileName);
+    controller->saveToFile(fileName);
 }
 
 void MainWindow::onTaskUpdated(const Task &task) {
@@ -119,7 +119,7 @@ void MainWindow::onTaskUpdated(const Task &task) {
             if (item->data(Qt::UserRole).toUuid() == task.id) {
                 delete list->takeItem(i);
                 addTaskToUI(task);
-                board->saveToFile(fileName);
+                controller->saveToFile(fileName);
                 return;
             }
         }
@@ -133,7 +133,7 @@ void MainWindow::onTaskRemoved(const QUuid &id) {
             auto *item = list->item(i);
             if (item->data(Qt::UserRole).toUuid() == id) {
                 delete list->takeItem(i);
-                board->saveToFile(fileName);
+                controller->saveToFile(fileName);
                 return;
             }
         }
@@ -148,12 +148,12 @@ void MainWindow::on_addBtn_clicked()
         QString description = form.getDescription();
         Priority priority = form.getPriority();
         Task task(title, description, Status::ToDo, priority);
-        board->addTask(task);
+        controller->addTask(task);
     }
 }
 
 void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
-    Task *task = board->getTaskById(id);
+    Task *task = controller->getTaskById(id);
     if (task && task->status != newStatus) {
         task->status = newStatus;
         
@@ -163,20 +163,20 @@ void MainWindow::onTaskDropped(const QUuid &id, Status newStatus){
         if (destinationList) {
             // Clear and reload only the destination list
             destinationList->clear();
-            for (const Task &taskItem : board->getTasks()) {
+            for (const Task &taskItem : controller->getTasks()) {
                 if (taskItem.status == newStatus) {
                     addTaskToUI(taskItem);
                 }
             }
         }
         
-        board->saveToFile(fileName);
+        controller->saveToFile(fileName);
     }
 }
 
 void MainWindow::showContextMenu(const QPoint &pos)
 {
-    if(board->isLocked)
+    if(controller->isLocked)
         return;
     QListWidget* list = qobject_cast<QListWidget*>(sender());
     QListWidgetItem* item = list->itemAt(pos);
@@ -203,16 +203,16 @@ void MainWindow::showContextMenu(const QPoint &pos)
 
 void MainWindow::onReloadClicked()
 {
-    if (board->tryReload(fileName)) {
+    if (controller->tryReload(fileName)) {
         ui->todoList->clear();
         ui->inProgressList->clear();
         ui->doneList->clear();
         
-        for (const Task &task : board->getTasks()) {
+        for (const Task &task : controller->getTasks()) {
             addTaskToUI(task);
         }
         
-        if (board->isLocked) {
+        if (controller->isLocked) {
             QMessageBox::information(this, "Reload", "Data reloaded successfully. File is still locked by another instance.");
         } else {
             QMessageBox::information(this, "Reload", "Data reloaded successfully. File lock acquired - you can now edit tasks.");
@@ -265,7 +265,7 @@ QListWidgetItem* MainWindow::createTaskListItem(const Task &task)
 
 void MainWindow::editTask(const QUuid &taskId)
 {
-    Task* task = board->getTaskById(taskId);
+    Task* task = controller->getTaskById(taskId);
     if (!task) return;
 
     EditForm dlg(this);
@@ -280,14 +280,14 @@ void MainWindow::editTask(const QUuid &taskId)
         Task newTask(newTitle, newDesc, task->status, newPriority);
         newTask.id = task->id;
         newTask.createdAt = task->createdAt;
-        board->updateTask(task, newTask);
+        controller->updateTask(task, newTask);
     }
 }
 
 void MainWindow::deleteTask(const QUuid &taskId)
 {
-    Task* task = board->getTaskById(taskId);
+    Task* task = controller->getTaskById(taskId);
     if (task) {
-        board->removeTask(taskId);
+        controller->removeTask(taskId);
     }
 }

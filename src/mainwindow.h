@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "board.h"
+#include "kanbancontroller.h"
 #include "status.h"
 #include "kanbanlistwidget.h"
 #include <QMainWindow>
@@ -34,7 +34,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Board *board;
+    KanbanController *controller;
     QString fileName;
     QPushButton *reloadBtn;
 
