@@ -17,6 +17,10 @@ Aplikacja Kanban to narzędzie do zarządzania zadaniami oparte na metodologii K
   - **Priorytet** - Niski/Średni/Wysoki
 - Kliknij "OK" aby utworzyć zadanie
 
+![wymagalność tytułu](./img/title_required.png)
+![tworzenie zadania](./img/create.png)
+![utworzone zadanie](./img/created.png)
+
 ### 2. Edycja istniejących zadań
 
 **Opis:** Modyfikowanie tytułu, opisu i priorytetu istniejących zadań.
@@ -27,6 +31,10 @@ Aplikacja Kanban to narzędzie do zarządzania zadaniami oparte na metodologii K
 - Wybierz "Edytuj" z menu kontekstowego
 - Zmodyfikuj dane w formularzu
 - Kliknij "OK" aby zapisać zmiany
+
+![menu kontekstowe](./img/context_menu.png)
+![edycja zadania](./img/edit.png)
+![zadanie po edycji, opis widoczny w tooltipie](./img/edited_and_tooltip.png)
 
 ### 3. Usuwanie zadań
 
@@ -50,6 +58,8 @@ Aplikacja Kanban to narzędzie do zarządzania zadaniami oparte na metodologii K
   - **W trakcie** - zadania w realizacji
   - **Zakończone** - zadania ukończone
 - Puść przycisk myszy aby upuścić zadanie
+
+![przesuwanie zadań](./img/moving.png)
 
 ### 5. Automatyczne sortowanie według priorytetu
 
@@ -94,6 +104,8 @@ Aplikacja Kanban to narzędzie do zarządzania zadaniami oparte na metodologii K
   - Przycisk "Dodaj zadanie" jest zastąpiony przyciskiem "Odśwież"
   - Menu kontekstowe jest wyłączone
 - Kliknij "Odśwież" aby sprawdzić czy plik jest nadal zablokowany
+
+![tryb do odczytu](./img/read_only_mode.png)
 
 ## Szczegóły implementacji
 
@@ -186,3 +198,6 @@ W przeciwnym wypadku:
 2. Uruchom aplikację - powinna uruchomić się w trybie tylko do odczytu
 3. Usuń plik kanban.json.lock
 4. Kliknij "Odśwież" - aplikacja powinna odzyskać możliwość edycji
+
+![odświeżanie - plik nadal zablokowany](./img/reloaded_locked.png)
+![odświeżanie - plik odblokowany](./img/reloaded_unlocked.png)
