@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "createform.h"
+#include "editform.h"
 #include "ui_mainwindow.h"
 #include <QStandardPaths>
 
@@ -16,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->todoList->setStatus(Status::ToDo);
     ui->inProgressList->setStatus(Status::InProgress);
     ui->doneList->setStatus(Status::Done);
-
     ui->todoList->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->inProgressList->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->doneList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -131,8 +131,29 @@ void MainWindow::showContextMenu(const QPoint &pos)
         return;
 
     if (selectedAction == editAction) {
-        QString taskTitle = item->text();
-        qDebug() << "Edytuj task:" << taskTitle;
+        QUuid taskId = item->data(Qt::UserRole).toUuid();
+        Task* task = board->getTaskById(taskId);
+
+        if (!task) return;
+
+        QString currentTitle = task->title;
+        QString currentDescription = task->description;
+
+        EditForm dlg(this);
+        dlg.setTitle(currentTitle);
+        dlg.setDescription(currentDescription);
+
+        if (dlg.exec() == QDialog::Accepted) {
+            QString newTitle = dlg.getTitle();
+            QString newDesc = dlg.getDescription();
+
+            if (!newTitle.isEmpty() && (newTitle != currentTitle || newDesc != currentDescription)) {
+                item->setText(newTitle);
+                task->title = newTitle;
+                task->description = newDesc;
+                board->saveToFile(fileName);
+            }
+        }
     }
     else if (selectedAction == deleteAction) {
         qDebug() << "Usuwam task:" << item->text();

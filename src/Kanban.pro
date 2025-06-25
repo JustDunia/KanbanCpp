@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     board.cpp \
     createform.cpp \
+    editform.cpp \
     kanbanlistwidget.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 HEADERS += \
     board.h \
     createform.h \
+    editform.h \
     kanbanlistwidget.h \
     mainwindow.h \
     status.h \
@@ -26,6 +28,7 @@ HEADERS += \
 
 FORMS += \
     createform.ui \
+    editform.ui \
     mainwindow.ui
 
 # Default rules for deployment.
