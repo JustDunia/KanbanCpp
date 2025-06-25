@@ -123,9 +123,8 @@ void MainWindow::showContextMenu(const QPoint &pos)
         return;
 
     QMenu contextMenu(this);
-
-    QAction* editAction = contextMenu.addAction("Edit");
-    QAction* deleteAction = contextMenu.addAction("Delete");
+    QAction* editAction = contextMenu.addAction(QIcon(":/icons/edit.png"), "Edit");
+    QAction* deleteAction = contextMenu.addAction(QIcon(":/icons/delete.png"), "Delete");
 
     QAction* selectedAction = contextMenu.exec(list->viewport()->mapToGlobal(pos));
     if (!selectedAction)
